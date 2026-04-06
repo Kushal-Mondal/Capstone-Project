@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EventSphere — Events</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --ink: #0b0c10; --surface: #111318; --border: rgba(255,255,255,0.07);
+      --cream: #f5f0e8; --gold: #c9a84c; --rust: #c4522a;
+      --teal-light: #4ecdc4; --muted: #6b6560; --muted-2: #4a4845;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--ink); color: var(--cream); min-height: 100vh; }
+    .app { display: flex; min-height: 100vh; }
+    .sidebar { width: 240px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 28px 0; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; }
+    .sidebar-logo { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 900; padding: 0 24px 28px; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+    .sidebar-logo span { color: var(--gold); }
+    .sidebar-section { font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted-2); padding: 0 24px; margin-bottom: 8px; margin-top: 12px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 24px; font-size: 0.875rem; font-weight: 500; color: var(--muted); text-decoration: none; position: relative; transition: color 0.2s, background 0.2s; }
+    .nav-item:hover { color: var(--cream); background: rgba(255,255,255,0.03); }
+    .nav-item.active { color: var(--gold); background: rgba(201,168,76,0.06); }
+    .nav-item.active::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--gold); }
+    .sidebar-footer { margin-top: auto; padding: 20px 24px; border-top: 1px solid var(--border); }
+    .admin-badge { display: flex; align-items: center; gap: 10px; }
+    .admin-avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--gold), var(--rust)); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: var(--ink); }
+    .admin-name { font-size: 0.82rem; font-weight: 600; }
+    .admin-role { font-size: 0.7rem; color: var(--muted); }
+    .main { margin-left: 240px; flex: 1; display: flex; flex-direction: column; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; padding: 20px 36px; border-bottom: 1px solid var(--border); background: var(--surface); position: sticky; top: 0; z-index: 50; }
+    .topbar-title { font-size: 1rem; font-weight: 600; }
+    .topbar-sub { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+    .page-content { padding: 36px; flex: 1; }
+    .section-title { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 20px; }
+    .events-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+    .event-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 28px; position: relative; overflow: hidden; transition: border-color 0.2s, transform 0.2s; cursor: pointer; }
+    .event-card:hover { border-color: rgba(255,255,255,0.14); transform: translateY(-2px); }
+    .event-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--card-accent, linear-gradient(90deg,var(--gold),var(--rust))); }
+    .event-emoji { font-size: 2rem; margin-bottom: 16px; display: block; }
+    .event-name { font-family: 'Playfair Display', serif; font-size: 1.15rem; font-weight: 700; margin-bottom: 6px; }
+    .event-desc { font-size: 0.8rem; color: var(--muted); line-height: 1.6; margin-bottom: 20px; }
+    .event-meta { display: flex; align-items: center; justify-content: space-between; }
+    .event-count { font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--muted); }
+    .event-count span { color: var(--cream); font-size: 1rem; font-weight: 600; display: block; }
+    .event-status { font-size: 0.7rem; font-weight: 600; padding: 4px 10px; border-radius: 100px; }
+    .status-open { background: rgba(78,205,196,0.1); color: var(--teal-light); }
+    .event-capacity { width: 100%; height: 3px; background: rgba(255,255,255,0.06); border-radius: 100px; margin-top: 16px; overflow: hidden; }
+    .event-capacity-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg,var(--gold),var(--teal-light)); transition: width 0.8s ease; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    .event-card { animation: fadeUp 0.4s ease both; }
+    .event-card:nth-child(2){animation-delay:0.05s}
+    .event-card:nth-child(3){animation-delay:0.1s}
+    .event-card:nth-child(4){animation-delay:0.15s}
+    .event-card:nth-child(5){animation-delay:0.2s}
+    .event-card:nth-child(6){animation-delay:0.25s}
+    .event-card:nth-child(7){animation-delay:0.3s}
+    @media(max-width:768px){.sidebar{display:none}.main{margin-left:0}.page-content{padding:20px}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="sidebar-logo">Event<span>Sphere</span></div>
+    <div class="sidebar-section">Main</div>
+    <a class="nav-item" href="/users-page">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Overview
+    </a>
+    <a class="nav-item" href="/registrations-page">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"/></svg>
+      Registrations
+    </a>
+    <a class="nav-item active" href="/events-page">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+      Events
+    </a>
+    <a class="nav-item" href="/analytics-page">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+      Analytics
+    </a>
+    <div class="sidebar-section">Config</div>
+    <a class="nav-item" href="#">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m0 14v1m8-8h-1M5 12H4m13.66-6.34l-.7.7M6.34 17.66l-.7.7m12.02 0l-.7-.7M6.34 6.34l-.7-.7M12 8a4 4 0 100 8 4 4 0 000-8z"/></svg>
+      Settings
+    </a>
+    <a class="nav-item" href="/">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+      Back to Site
+    </a>
+    <div class="sidebar-footer">
+      <div class="admin-badge">
+        <div class="admin-avatar">AD</div>
+        <div><div class="admin-name">Admin</div><div class="admin-role">Super Admin</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title">Events</div>
+        <div class="topbar-sub">All active and upcoming events</div>
+      </div>
+    </div>
+    <div class="page-content">
+      <div class="section-title">Active Events</div>
+      <div class="events-grid" id="eventsGrid">
+        <div style="color:var(--muted);padding:20px;">Loading events...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const EVENTS_DATA = [
+  { name:'Cultural Fest', emoji:'🎨', desc:'A celebration of art, music, dance and culture from across the campus.', accent:'linear-gradient(90deg,#c9a84c,#e8c96a)', capacity:150, status:'open' },
+  { name:'Hackathon', emoji:'💻', desc:'24-hour coding marathon to build innovative solutions to real-world problems.', accent:'linear-gradient(90deg,#1a7a6e,#4ecdc4)', capacity:80, status:'open' },
+  { name:'TEDx', emoji:'🎤', desc:'Ideas worth spreading — talks from students, faculty and industry leaders.', accent:'linear-gradient(90deg,#c4522a,#e8a06a)', capacity:200, status:'open' },
+  { name:'Sports Meet', emoji:'🏆', desc:'Annual inter-department sports championship across 10+ sporting events.', accent:'linear-gradient(90deg,#6b35a8,#c9a84c)', capacity:300, status:'open' },
+  { name:'Battle of Bands', emoji:'🎵', desc:'Showcase your musical talent in the ultimate college band competition.', accent:'linear-gradient(90deg,#1a4a7a,#4ecdc4)', capacity:100, status:'open' },
+  { name:'Photography Contest', emoji:'📷', desc:'Capture the world through your lens — open to all genres and styles.', accent:'linear-gradient(90deg,#c9a84c,#c4522a)', capacity:60, status:'open' },
+  { name:'Debate Competition', emoji:'🗣️', desc:'Battle of minds — argue, persuade and win in this inter-college debate.', accent:'linear-gradient(90deg,#4ecdc4,#1a7a6e)', capacity:50, status:'open' },
+];
+
+async function loadEvents() {
+  let users = [];
+  try {
+    const res = await fetch('/users');
+    users = await res.json();
+  } catch(e) {}
+
+  const countMap = {};
+  users.forEach(u => countMap[u.event] = (countMap[u.event] || 0) + 1);
+
+  document.getElementById('eventsGrid').innerHTML = EVENTS_DATA.map(ev => {
+    const count = countMap[ev.name] || 0;
+    const pct = Math.min(100, Math.round(count / ev.capacity * 100));
+    return `
+      <div class="event-card" style="--card-accent:${ev.accent}">
+        <span class="event-emoji">${ev.emoji}</span>
+        <div class="event-name">${ev.name}</div>
+        <div class="event-desc">${ev.desc}</div>
+        <div class="event-meta">
+          <div class="event-count">
+            <span>${count}</span>registered
+          </div>
+          <div class="event-count" style="text-align:center">
+            <span>${ev.capacity}</span>capacity
+          </div>
+          <span class="event-status status-open">● Open</span>
+        </div>
+        <div class="event-capacity">
+          <div class="event-capacity-fill" style="width:${pct}%"></div>
+        </div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--muted);margin-top:6px;text-align:right">${pct}% full</div>
+      </div>
+    `;
+  }).join('');
+}
+
+loadEvents();
+</script>
+</body>
+</html>

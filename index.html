@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EventSphere — College Event Registration</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --ink: #0b0c10;
+      --cream: #f5f0e8;
+      --gold: #c9a84c;
+      --gold-light: #e8c96a;
+      --rust: #c4522a;
+      --teal: #1a7a6e;
+      --muted: #6b6560;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background-color: var(--ink);
+      color: var(--cream);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.12;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .orb-1 { width: 600px; height: 600px; background: var(--gold); top: -200px; right: -200px; animation: drift1 18s ease-in-out infinite; }
+    .orb-2 { width: 500px; height: 500px; background: var(--teal); bottom: -150px; left: -150px; animation: drift2 22s ease-in-out infinite; }
+    .orb-3 { width: 300px; height: 300px; background: var(--rust); top: 40%; left: 30%; animation: drift3 15s ease-in-out infinite; }
+
+    @keyframes drift1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-40px,60px)} }
+    @keyframes drift2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(60px,-40px)} }
+    @keyframes drift3 { 0%,100%{transform:translate(0,0)} 33%{transform:translate(30px,-50px)} 66%{transform:translate(-30px,30px)} }
+
+    .content { position: relative; z-index: 1; }
+
+    .site-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 24px 48px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      color: var(--cream);
+    }
+    .logo span { color: var(--gold); }
+    .nav-link {
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-link:hover { color: var(--gold); }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      min-height: calc(100vh - 85px);
+      align-items: center;
+    }
+
+    .hero-left { padding: 80px 48px 80px 48px; }
+
+    .tag-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold);
+      border: 1px solid rgba(201,168,76,0.3);
+      border-radius: 100px;
+      padding: 6px 14px;
+      margin-bottom: 32px;
+      backdrop-filter: blur(8px);
+      background: rgba(201,168,76,0.05);
+    }
+    .tag-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--gold);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%,100%{opacity:1;transform:scale(1)}
+      50%{opacity:0.4;transform:scale(0.7)}
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(3rem, 5vw, 5.5rem);
+      font-weight: 900;
+      line-height: 1.0;
+      letter-spacing: -0.03em;
+      margin-bottom: 24px;
+    }
+    h1 em { color: var(--gold); font-style: italic; }
+
+    .hero-desc {
+      font-size: 1rem;
+      line-height: 1.7;
+      color: var(--muted);
+      max-width: 400px;
+      margin-bottom: 48px;
+    }
+
+    .stats-row { display: flex; gap: 40px; }
+    .stat-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--cream);
+    }
+    .stat-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .hero-right {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 48px 80px 0;
+    }
+
+    .form-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px;
+      padding: 48px;
+      width: 100%;
+      max-width: 460px;
+      backdrop-filter: blur(20px);
+      position: relative;
+      overflow: hidden;
+    }
+    .form-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(201,168,76,0.5), transparent);
+    }
+
+    .form-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .form-subtitle {
+      font-size: 0.84rem;
+      color: var(--muted);
+      margin-bottom: 36px;
+    }
+
+    .field-group { margin-bottom: 20px; }
+    .field-label {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .field-input, .field-select {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 14px 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      color: var(--cream);
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+      appearance: none;
+    }
+    .field-input::placeholder { color: rgba(255,255,255,0.2); }
+    .field-input:focus, .field-select:focus {
+      border-color: rgba(201,168,76,0.5);
+      background: rgba(201,168,76,0.05);
+    }
+    .field-select option { background: #1a1c22; color: var(--cream); }
+
+    .select-wrapper { position: relative; }
+    .select-arrow {
+      position: absolute;
+      right: 16px; top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: var(--muted);
+    }
+
+    .submit-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: var(--gold);
+      color: var(--ink);
+      border: none;
+      border-radius: 10px;
+      padding: 16px 24px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      margin-top: 8px;
+    }
+    .submit-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
+    .submit-btn:active { transform: translateY(0); }
+    .submit-btn:hover svg { transform: translateX(3px); }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 24px 0;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.08);
+    }
+
+    .admin-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 13px;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-decoration: none;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .admin-link:hover { border-color: rgba(255,255,255,0.25); color: var(--cream); }
+
+    .toast {
+      position: fixed;
+      bottom: 32px; right: 32px;
+      background: rgba(20,22,28,0.95);
+      border: 1px solid rgba(201,168,76,0.4);
+      border-radius: 14px;
+      padding: 16px 22px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.88rem;
+      color: var(--cream);
+      z-index: 999;
+      transform: translateY(80px);
+      opacity: 0;
+      transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
+      backdrop-filter: blur(20px);
+      max-width: 320px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast-icon {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .toast-icon.success { background: rgba(26,122,110,0.3); color: #4ecdc4; }
+    .toast-icon.error { background: rgba(196,82,42,0.3); color: #ff6b6b; }
+
+    .btn-loading {
+      display: none;
+      width: 18px; height: 18px;
+      border: 2px solid rgba(0,0,0,0.2);
+      border-top-color: var(--ink);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .deco-line {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 1px; height: 60%;
+      background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.06), transparent);
+    }
+
+    .event-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    .event-badge {
+      font-size: 0.72rem;
+      letter-spacing: 0.05em;
+      padding: 4px 12px;
+      border-radius: 100px;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--muted);
+    }
+
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(24px); }
+      to { opacity:1; transform:translateY(0); }
+    }
+    .hero-left { animation: fadeUp 0.7s ease both; }
+    .form-card { animation: fadeUp 0.7s 0.15s ease both; }
+
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; }
+      .hero-left { padding: 60px 24px 40px; }
+      .hero-right { padding: 0 24px 60px; }
+      .site-header { padding: 20px 24px; }
+      .deco-line { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<div class="content">
+  <header class="site-header">
+    <div class="logo">Event<span>Sphere</span></div>
+    <nav style="display:flex;gap:32px;align-items:center;">
+      <a href="#" class="nav-link">Events</a>
+      <a href="#" class="nav-link">Schedule</a>
+      <a href="/users-page" class="nav-link" style="color:var(--gold);">Admin ↗</a>
+    </nav>
+  </header>
+
+  <section class="hero" style="position:relative;">
+    <div class="deco-line"></div>
+
+    <div class="hero-left">
+      <div class="tag-pill">
+        <span class="tag-dot"></span>
+        Registration Open — Spring 2025
+      </div>
+
+      <h1>Where <em>ideas</em><br/>meet the<br/>crowd.</h1>
+
+      <p class="hero-desc">
+        EventSphere is your college's premier event platform. Register for workshops, hackathons, cultural nights, and more — all in one place.
+      </p>
+
+      <div class="event-tags">
+        <span class="event-badge">🎨 Cultural Fest</span>
+        <span class="event-badge">💻 Hackathon</span>
+        <span class="event-badge">🎤 TEDx</span>
+        <span class="event-badge">🏆 Sports Meet</span>
+        <span class="event-badge">🎵 Battle of Bands</span>
+      </div>
+
+      <div class="stats-row">
+        <div>
+          <div class="stat-num">12+</div>
+          <div class="stat-label">Events</div>
+        </div>
+        <div>
+          <div class="stat-num">800+</div>
+          <div class="stat-label">Participants</div>
+        </div>
+        <div>
+          <div class="stat-num">3</div>
+          <div class="stat-label">Days</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <div class="form-card">
+        <div class="form-title">Register Now</div>
+        <p class="form-subtitle">Secure your spot before seats fill up.</p>
+
+        <div class="field-group">
+          <label class="field-label" for="name">Full Name</label>
+          <input class="field-input" type="text" id="name" placeholder="e.g. Arjun Patel"/>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="email">College Email</label>
+          <input class="field-input" type="email" id="email" placeholder="you@college.edu"/>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="event">Choose Event</label>
+          <div class="select-wrapper">
+            <select class="field-select" id="event">
+              <option value="" disabled selected>Select an event...</option>
+              <option value="Cultural Fest">🎨 Cultural Fest</option>
+              <option value="Hackathon">💻 Hackathon 2025</option>
+              <option value="TEDx">🎤 TEDx College</option>
+              <option value="Sports Meet">🏆 Annual Sports Meet</option>
+              <option value="Battle of Bands">🎵 Battle of Bands</option>
+              <option value="Photography Contest">📷 Photography Contest</option>
+              <option value="Debate Competition">🗣️ Debate Competition</option>
+            </select>
+            <span class="select-arrow">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+            </span>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="year">Year of Study</label>
+          <div class="select-wrapper">
+            <select class="field-select" id="year">
+              <option value="" disabled selected>Select year...</option>
+              <option value="FY">First Year</option>
+              <option value="SY">Second Year</option>
+              <option value="TY">Third Year</option>
+              <option value="LY">Final Year</option>
+            </select>
+            <span class="select-arrow">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+            </span>
+          </div>
+        </div>
+
+        <button class="submit-btn" id="registerBtn" onclick="handleRegister()">
+          <span id="btnText">Reserve My Spot</span>
+          <div class="btn-loading" id="btnLoader"></div>
+          <svg id="btnArrow" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+          </svg>
+        </button>
+
+        <div class="divider">or</div>
+
+        <a href="/users-page" class="admin-link">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          Admin Dashboard
+        </a>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="toast" id="toast">
+  <div class="toast-icon success" id="toastIcon">
+    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+  </div>
+  <div>
+    <div id="toastTitle" style="font-weight:600;margin-bottom:2px;"></div>
+    <div id="toastMsg" style="color:var(--muted);font-size:0.8rem;"></div>
+  </div>
+</div>
+
+<script>
+  function showToast(title, msg, type='success') {
+    const toast = document.getElementById('toast');
+    const icon = document.getElementById('toastIcon');
+    document.getElementById('toastTitle').textContent = title;
+    document.getElementById('toastMsg').textContent = msg;
+    icon.className = `toast-icon ${type}`;
+    icon.innerHTML = type === 'success'
+      ? `<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`
+      : `<svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>`;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 4000);
+  }
+
+  function setLoading(loading) {
+    const btn = document.getElementById('registerBtn');
+    const text = document.getElementById('btnText');
+    const loader = document.getElementById('btnLoader');
+    const arrow = document.getElementById('btnArrow');
+    if (loading) {
+      btn.disabled = true;
+      text.textContent = 'Registering...';
+      loader.style.display = 'block';
+      arrow.style.display = 'none';
+    } else {
+      btn.disabled = false;
+      text.textContent = 'Reserve My Spot';
+      loader.style.display = 'none';
+      arrow.style.display = 'block';
+    }
+  }
+
+  async function handleRegister() {
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const event = document.getElementById('event').value;
+    const year = document.getElementById('year').value;
+
+    if (!name || !event) {
+      showToast('Missing fields', 'Please fill in your name and select an event.', 'error');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const res = await fetch('/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, event, year })
+      });
+
+      if (res.ok) {
+        showToast('You\'re registered! 🎉', `See you at ${event}, ${name.split(' ')[0]}!`);
+        document.getElementById('name').value = '';
+        document.getElementById('email').value = '';
+        document.getElementById('event').value = '';
+        document.getElementById('year').value = '';
+      } else {
+        throw new Error('Server error');
+      }
+    } catch (err) {
+      showToast('Registration failed', 'Please try again in a moment.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && document.activeElement.tagName !== 'SELECT') handleRegister();
+  });
+</script>
+</body>
+</html>
