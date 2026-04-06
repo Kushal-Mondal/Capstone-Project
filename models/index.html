@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Event Registration</title>
+</head>
+<body>
+
+<h2>Register for Event</h2>
+
+<input type="text" id="name" placeholder="Enter Name"><br><br>
+<input type="text" id="event" placeholder="Enter Event"><br><br>
+
+<button id="registerBtn" onclick="register()">Register</button>
+
+<div id="toast" style="
+position: fixed;
+top: 20px;
+right: 20px;
+background: green;
+color: white;
+padding: 10px;
+border-radius: 5px;
+display: none;
+">
+  Registered successfully ✅
+</div>
+
+<script>
+async function register() {
+  const btn = document.getElementById("registerBtn");
+
+  // 🔒 Disable button + show loading
+  btn.disabled = true;
+  btn.innerText = "Registering...";
+
+  const name = document.getElementById("name").value;
+  const event = document.getElementById("event").value;
+
+  try {
+    const res = await fetch("http://localhost:3000/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ name, event })
+    });
+
+    const data = await res.json();
+
+    showToast();
+
+    setTimeout(() => {
+      window.location.href = "/users-page";
+    }, 1500);
+
+  } catch (err) {
+    alert("Something went wrong");
+
+    // 🔓 Enable button again if error
+    btn.disabled = false;
+    btn.innerText = "Register";
+  }
+}
+
+// ✅ Toast function (keep it)
+function showToast() {
+  const toast = document.getElementById("toast");
+  toast.style.display = "block";
+
+  setTimeout(() => {
+    toast.style.display = "none";
+  }, 3000);
+}
+</script>
+
+</body>
+</html>
